@@ -43,8 +43,7 @@
   <div class="container">
     <div class="top">
       <div class="logo">
-        <!-- Logo atualizada -->
-        <img id="logoImg" src="/logo.jpg" alt="JGE Soluções em Elétrica Logo" />
+        <img id="logoImg" src="logo.jpg" alt="JGE Soluções em Elétrica Logo" onerror="this.style.display='none'" />
       </div>
       <div>
         <h1>JGE Soluções em Elétrica ⚡</h1>
@@ -198,6 +197,7 @@
         const tr = document.createElement('tr');
         const itemTotal = Number(it.valor) * Number(it.qtd);
         total += itemTotal;
+
         tr.innerHTML = `
           <td>${escapeHtml(it.desc)}</td>
           <td style="text-align:right">${it.qtd}</td>
@@ -249,28 +249,30 @@
         }
       }
 
-      let cursorY = 14;
+      const cursorY = 14;
+      const marginLeft = 14;
+      const pageWidth = doc.internal.pageSize.getWidth();
+
       if (logoDataUrl) {
-        const maxLogoWidthMM = 60;
-        doc.addImage(logoDataUrl, 'PNG', (210 - maxLogoWidthMM) / 2, cursorY, maxLogoWidthMM, 0);
-        cursorY += 20;
+        const maxLogoWidthMM = 50;
+        doc.addImage(logoDataUrl, 'PNG', pageWidth - maxLogoWidthMM - marginLeft, cursorY, maxLogoWidthMM, 0);
       }
 
       doc.setFontSize(12);
-      doc.text('JGE Soluções em Elétrica', 14, cursorY + 6);
+      doc.text('JGE Soluções em Elétrica', marginLeft, cursorY + 6);
       doc.setFontSize(10);
-      doc.text('Manutenção e Instalação Elétrica', 14, cursorY + 12);
-      doc.text('Telefones: (31) 95038-755 / (31) 98778-1566 / (31) 98702-6977', 14, cursorY + 18);
-      doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, cursorY + 24);
+      doc.text('Manutenção e Instalação Elétrica', marginLeft, cursorY + 12);
+      doc.text('Telefones: (31) 95038-755 / (31) 98778-1566 / (31) 98702-6977', marginLeft, cursorY + 18);
+      doc.text(`Data: ${new Date().toLocaleDateString()}`, marginLeft, cursorY + 24);
 
-      let yCliente = cursorY + 34;
+      const yCliente = cursorY + 34;
       doc.setFontSize(11);
-      doc.text('Cliente:', 14, yCliente);
+      doc.text('Cliente:', marginLeft, yCliente);
       doc.setFontSize(10);
-      doc.text(clienteNome.value || '-', 34, yCliente);
-      if (clienteTel.value) doc.text(`Telefone: ${clienteTel.value}`, 14, yCliente + 6);
-      if (clienteEndereco.value) doc.text(`Endereço: ${clienteEndereco.value}`, 14, yCliente + 12);
-      if (clienteWhats.value) doc.text(`WhatsApp: ${clienteWhats.value}`, 14, yCliente + 18);
+      doc.text(clienteNome.value || '-', marginLeft + 20, yCliente);
+      if (clienteTel.value) doc.text(`Telefone: ${clienteTel.value}`, marginLeft, yCliente + 6);
+      if (clienteEndereco.value) doc.text(`Endereço: ${clienteEndereco.value}`, marginLeft, yCliente + 12);
+      if (clienteWhats.value) doc.text(`WhatsApp: ${clienteWhats.value}`, marginLeft, yCliente + 18);
 
       const startTableY = yCliente + 28;
       const body = items.map(it => [it.desc, String(it.qtd), formatMoneyBR(it.valor), formatMoneyBR(it.valor * it.qtd)]);
@@ -280,22 +282,21 @@
         body,
         styles: { fontSize: 10 },
         headStyles: { fillColor: [230,230,230] },
-        margin: { left: 14, right: 14 }
+        margin: { left: marginLeft, right: marginLeft }
       });
 
       const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : startTableY + (body.length+2)*8;
       const totalValue = items.reduce((s,it) => s + (it.valor * it.qtd), 0);
       doc.setFontSize(11);
-      doc.text(`Subtotal: ${formatMoneyBR(totalValue)}`, 14, finalY);
+      doc.text(`Subtotal: ${formatMoneyBR(totalValue)}`, marginLeft, finalY);
       doc.setFontSize(12);
-      doc.text(`Total: ${formatMoneyBR(totalValue)}`, 14, finalY + 8);
+      doc.text(`Total: ${formatMoneyBR(totalValue)}`, marginLeft, finalY + 8);
 
       doc.setFontSize(9);
-      doc.text('Orçamento válido por 7 dias. Agradecemos a preferência!', 14, 287);
+      doc.text('Orçamento válido por 7 dias. Agradecemos a preferência!', marginLeft, 287);
 
       const safeName = nome.replace(/[^a-zA-Z0-9-_ ]/g, '');
       const filename = `Orçamento JGE Soluções em Elétrica - ${safeName}.pdf`;
-
       doc.save(filename);
 
       alert('PDF gerado e baixado no seu dispositivo. Para enviar por WhatsApp, abra o chat do cliente e anexe o arquivo PDF gerado.');
