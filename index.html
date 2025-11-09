@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>JGE Elétrica - Orçamentos</title>
+  <title>JGE Soluções em Elétrica - Orçamentos</title>
 
   <!-- jsPDF + autotable + html2canvas (CDN) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -43,11 +43,11 @@
   <div class="container">
     <div class="top">
       <div class="logo">
-        <!-- Coloque o arquivo logo.png na mesma pasta (public) -->
-        <img id="logoImg" src="logo.png" alt="JGE Elétrica Logo" onerror="this.style.display='none'" />
+        <!-- Logo atualizada -->
+        <img id="logoImg" src="/logo.jpg" alt="JGE Soluções em Elétrica Logo" />
       </div>
       <div>
-        <h1>JGE Elétrica ⚡</h1>
+        <h1>JGE Soluções em Elétrica ⚡</h1>
         <div>Manutenção e Instalação Elétrica</div>
         <div style="font-size:13px;color:#555">Telefones: (31) 95038-755 / (31) 98778-1566 / (31) 98702-6977</div>
       </div>
@@ -121,18 +121,15 @@
     </div>
 
     <div class="rodape">
-      Desenvolvido por <b>JGE Elétrica ⚡</b><br>
+      Desenvolvido por <b>JGE Soluções em Elétrica ⚡</b><br>
       Orçamento válido por 7 dias. Agradecemos a preferência!
     </div>
   </div>
 
   <script>
-    // Estado local
     let items = [];
     const storageKey = 'jge_orcamentos_items_v1';
-    const storageQuotesKey = 'jge_orcamentos_savedquotes_v1';
 
-    // Elementos
     const clienteNome = document.getElementById('clienteNome');
     const clienteTel = document.getElementById('clienteTel');
     const clienteWhats = document.getElementById('clienteWhats');
@@ -152,7 +149,6 @@
     const btnEnviarWhats = document.getElementById('btnEnviarWhats');
     const btnNovo = document.getElementById('btnNovo');
 
-    // Carregar itens do localStorage (se desejar manter durante sessão)
     function loadState() {
       const raw = localStorage.getItem(storageKey);
       if (raw) {
@@ -164,12 +160,10 @@
       localStorage.setItem(storageKey, JSON.stringify(items));
     }
 
-    // Função util
     function formatMoneyBR(v) {
       return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // Adicionar item
     btnAddItem.addEventListener('click', (e) => {
       e.preventDefault();
       const desc = itemDesc.value.trim();
@@ -188,7 +182,6 @@
       saveState();
     });
 
-    // Renderizar tabela de itens
     function renderItems() {
       if (items.length === 0) {
         itemsTable.style.display = 'none';
@@ -205,7 +198,6 @@
         const tr = document.createElement('tr');
         const itemTotal = Number(it.valor) * Number(it.qtd);
         total += itemTotal;
-
         tr.innerHTML = `
           <td>${escapeHtml(it.desc)}</td>
           <td style="text-align:right">${it.qtd}</td>
@@ -220,7 +212,6 @@
       totalText.innerText = formatMoneyBR(total);
     }
 
-    // Remover item
     window.removeItem = function(index) {
       if (!confirm('Remover este serviço?')) return;
       items.splice(index,1);
@@ -228,7 +219,6 @@
       saveState();
     }
 
-    // Novo orçamento (limpa formulário mas mantém histórico de orçamentos salvos)
     btnNovo.addEventListener('click', () => {
       if (!confirm('Começar novo orçamento? Os serviços atuais serão limpos.')) return;
       clienteNome.value = '';
@@ -240,7 +230,6 @@
       saveState();
     });
 
-    // Gerar PDF (download)
     btnGerarPDF.addEventListener('click', async () => {
       const nome = clienteNome.value.trim();
       if (!nome) { alert('Preencha o nome do cliente antes de gerar o PDF.'); return; }
@@ -249,7 +238,6 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-      // tentar capturar logo (se existir)
       const logoImg = document.getElementById('logoImg');
       let logoDataUrl = null;
       if (logoImg && logoImg.complete && logoImg.naturalWidth !== 0) {
@@ -261,25 +249,20 @@
         }
       }
 
-      // inserir logo se tiver
       let cursorY = 14;
       if (logoDataUrl) {
-        // dimensionar logo (max width em mm)
         const maxLogoWidthMM = 60;
-        // aproximar largura da imagem em px -> mm: usar 96 DPI ~ px to mm conversion rough; melhor usar fixed width
         doc.addImage(logoDataUrl, 'PNG', (210 - maxLogoWidthMM) / 2, cursorY, maxLogoWidthMM, 0);
-        cursorY += 20; // espaço para logo
+        cursorY += 20;
       }
 
-      // Cabeçalho empresa
       doc.setFontSize(12);
-      doc.text('JGE Elétrica', 14, cursorY + 6);
+      doc.text('JGE Soluções em Elétrica', 14, cursorY + 6);
       doc.setFontSize(10);
       doc.text('Manutenção e Instalação Elétrica', 14, cursorY + 12);
       doc.text('Telefones: (31) 95038-755 / (31) 98778-1566 / (31) 98702-6977', 14, cursorY + 18);
       doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, cursorY + 24);
 
-      // Cliente
       let yCliente = cursorY + 34;
       doc.setFontSize(11);
       doc.text('Cliente:', 14, yCliente);
@@ -289,7 +272,6 @@
       if (clienteEndereco.value) doc.text(`Endereço: ${clienteEndereco.value}`, 14, yCliente + 12);
       if (clienteWhats.value) doc.text(`WhatsApp: ${clienteWhats.value}`, 14, yCliente + 18);
 
-      // Tabela de itens usando autotable
       const startTableY = yCliente + 28;
       const body = items.map(it => [it.desc, String(it.qtd), formatMoneyBR(it.valor), formatMoneyBR(it.valor * it.qtd)]);
       doc.autoTable({
@@ -301,7 +283,6 @@
         margin: { left: 14, right: 14 }
       });
 
-      // Totais
       const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : startTableY + (body.length+2)*8;
       const totalValue = items.reduce((s,it) => s + (it.valor * it.qtd), 0);
       doc.setFontSize(11);
@@ -309,42 +290,32 @@
       doc.setFontSize(12);
       doc.text(`Total: ${formatMoneyBR(totalValue)}`, 14, finalY + 8);
 
-      // Rodapé
       doc.setFontSize(9);
-      doc.text('Orçamento válido por 7 dias. Agradecemos a preferência!', 14, 287); // posiciona perto do final da folha
+      doc.text('Orçamento válido por 7 dias. Agradecemos a preferência!', 14, 287);
 
-      // Nome do arquivo: Orçamento JGE Elétrica - [Nome do Cliente].pdf
       const safeName = nome.replace(/[^a-zA-Z0-9-_ ]/g, '');
-      const filename = `Orçamento JGE Elétrica - ${safeName}.pdf`;
+      const filename = `Orçamento JGE Soluções em Elétrica - ${safeName}.pdf`;
 
-      // Baixar automaticamente
       doc.save(filename);
 
-      // aviso para o usuário (manual attach)
       alert('PDF gerado e baixado no seu dispositivo. Para enviar por WhatsApp, abra o chat do cliente e anexe o arquivo PDF gerado.');
     });
 
-    // Enviar WhatsApp: abre o link com mensagem pronta (você anexa o PDF manualmente)
     btnEnviarWhats.addEventListener('click', () => {
       const nome = clienteNome.value.trim();
       if (!nome) { alert('Preencha o nome do cliente antes de enviar pelo WhatsApp.'); return; }
-      // mensagem formal confirmada
-      const message = `Prezado(a) cliente,%0A%0ASegue em anexo o orçamento referente ao serviço solicitado.%0A%0AAtenciosamente,%0AJGE Elétrica ⚡`;
-      // se o usuário colocou whatsapp do cliente, abrir conversa com número (formato internacional BR: 55 + numero)
+      const message = `Prezado(a) cliente,%0A%0ASegue em anexo o orçamento referente ao serviço solicitado.%0A%0AAtenciosamente,%0AJGE Soluções em Elétrica ⚡`;
       const rawNumber = clienteWhats.value.replace(/\D/g,'');
       let url = '';
       if (rawNumber.length >= 10) {
-        // presumir Brasil
         const withCountry = rawNumber.startsWith('55') ? rawNumber : ('55' + rawNumber);
         url = `https://wa.me/${withCountry}?text=${message}`;
       } else {
-        // abrir wa.me sem número => usuário escolhe contato manualmente
         url = `https://wa.me/?text=${message}`;
       }
       window.open(url, '_blank');
     });
 
-    // escapando HTML simples
     function escapeHtml(s) {
       return String(s)
         .replace(/&/g, '&amp;')
@@ -354,11 +325,8 @@
         .replace(/'/g, '&#039;');
     }
 
-    // Inicializar
     loadState();
     renderItems();
-
-    // antes de fechar, salvar estado se quiser manter itens entre sessões:
     window.addEventListener('beforeunload', saveState);
   </script>
 </body>
