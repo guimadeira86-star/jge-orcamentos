@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JGE Elétrica - Orçamentos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #222;
+    }
+    .logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .logo img {
+      max-width: 180px;
+      height: auto;
+    }
+    .box {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 5px;
+    }
+    button {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .rodape {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <img src="logo.png" alt="Logo JGE Elétrica" />
+  </div>
+  <h1>JGE Elétrica ⚡</h1>
+  <div class="box">
+    <h3>Dados do Cliente</h3>
+    <label>Nome do Cliente:</label>
+    <input id="nomeCliente" type="text" placeholder="Digite o nome completo" />
+    <label>Descrição do Serviço:</label>
+    <textarea id="descricao" rows="3" placeholder="Ex: Instalação de tomada, revisão de circuito..."></textarea>
+    <label>Valor (R$):</label>
+    <input id="valor" type="number" placeholder="Ex: 250" />
+    <button onclick="gerarPDF()">Gerar PDF</button>
+    <button onclick="enviarWhatsApp()">Enviar WhatsApp</button>
+  </div>
+
+  <div class="rodape">
+    Desenvolvido por <b>JGE Elétrica ⚡</b><br>
+    Telefones: (31) 95038-755 / (31) 98778-1566 / (31) 98702-6977
+  </div>
+
+  <script>
+    async function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const descricao = document.getElementById('descricao').value.trim();
+      const valor = document.getElementById('valor').value.trim();
+
+      if (!nome || !descricao || !valor) {
+        alert('Preencha todos os campos antes de gerar o PDF.');
+        return;
+      }
+
+      const doc = new jsPDF();
+      const logo = document.querySelector('.logo img');
+      if (logo && logo.complete) {
+        const canvas = await htmlToCanvas(logo);
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 70, 10, 70, 25);
+      }
+
+      doc.setFontSize(14);
+      doc.text('JGE Elétrica ⚡', 20, 50);
+      doc.setFontSize(11);
+      doc.text('Manutenção e Instalação Elétrica', 20, 57);
+      doc.text('Telefones: (31) 95038-755 / (31) 98778-1566 / (31) 98702-6977', 20, 64);
+      doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 71);
+      doc.text(`Cliente: ${nome}`, 20, 82);
+      doc.text('Descrição do serviço:', 20, 92);
+      doc.text(descricao, 20, 100, { maxWidth: 170 });
+      doc.text(`Valor Total: R$ ${Number(valor).toFixed(2)}`, 20, 130);
+      doc.text('Atenciosamente,', 20, 150);
+      doc.text('JGE Elétrica ⚡', 20, 157);
+
+      doc.save(`orcamento-${nome}.pdf`);
+    }
+
+    function enviarWhatsApp() {
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const msg = `Prezado(a) ${nome},%0A%0ASegue em anexo o orçamento referente ao serviço solicitado.%0A%0AAtenciosamente,%0AJGE Elétrica ⚡`;
+      const link = `https://wa.me/?text=${msg}`;
+      window.open(link, '_blank');
+    }
+
+    async function htmlToCanvas(element) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = element.width;
+      canvas.height = element.height;
+      ctx.drawImage(element, 0, 0, element.width, element.height);
+      return canvas;
+    }
+  </script>
+</body>
+</html>
